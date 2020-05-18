@@ -1,0 +1,15 @@
+{
+    "root":"..",
+    "train":
+    {
+        "tokyo":"./data/tokyo.train"
+    },
+    "test_emb":
+    {
+        "tokyo":"./data/tokyo.val"
+    },
+    "test":
+    {
+        "tokyo":"./data/tokyo.val"
+    }
+}

@@ -1,5 +1,5 @@
 yacs
-opencv-python
+opencv-python-headless
 cython-bbox
 scipy
 numba

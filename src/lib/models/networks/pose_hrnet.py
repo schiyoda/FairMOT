@@ -545,6 +545,6 @@ def get_pose_net(num_layers, heads, head_conv):
         cfg_dir = '../src/lib/models/networks/config/hrnet_w18.yaml'
     update_config(cfg, cfg_dir)
     model = PoseHighResolutionNet(cfg, heads)
-    #model.init_weights(cfg.MODEL.PRETRAINED)
+    model.init_weights(cfg.MODEL.PRETRAINED)
 
     return model

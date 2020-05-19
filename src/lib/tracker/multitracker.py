@@ -18,7 +18,7 @@ from .basetrack import BaseTrack, TrackState
 
 class STrack(BaseTrack):
     shared_kalman = KalmanFilter()
-    def __init__(self, tlwh, score, temp_feat, buffer_size=30):
+    def __init__(self, tlwh, score, temp_feat, buffer_size=30, classid=0):
 
         # wait activate
         self._tlwh = np.asarray(tlwh, dtype=np.float)
@@ -33,6 +33,7 @@ class STrack(BaseTrack):
         self.update_features(temp_feat)
         self.features = deque([], maxlen=buffer_size)
         self.alpha = 0.9
+        self.classid = classid
 
     def update_features(self, feat):
         feat /= np.linalg.norm(feat)
@@ -247,9 +248,22 @@ class JDETracker(object):
             id_feature = _tranpose_and_gather_feat(id_feature, inds)
             id_feature = id_feature.squeeze(0)
             id_feature = id_feature.cpu().numpy()
-
+        
         dets = self.post_process(dets, meta)
-        dets = self.merge_outputs([dets])[1]
+        ##dets = self.merge_outputs([dets])[1]
+        ####
+        dets1 = self.merge_outputs([dets])[1]
+        dets1 = np.array(dets1)
+        class1 = np.full((dets1.shape[0],1), int(0))
+        dets1 = np.c_[dets1,class1]
+    
+        dets2 = self.merge_outputs([dets])[2]
+        dets2 = np.array(dets2)
+        class2 = np.full((dets2.shape[0],1), int(1))
+        dets2 = np.c_[dets2,class2]
+        dets = np.r_[dets1, dets2]
+        ####
+        
 
         remain_inds = dets[:, 4] > self.opt.conf_thres
         dets = dets[remain_inds]
@@ -269,11 +283,10 @@ class JDETracker(object):
 
         if len(dets) > 0:
             '''Detections'''
-            detections = [STrack(STrack.tlbr_to_tlwh(tlbrs[:4]), tlbrs[4], f, 30) for
-                          (tlbrs, f) in zip(dets[:, :5], id_feature)]
+            detections = [STrack(STrack.tlbr_to_tlwh(tlbrs[:4]), tlbrs[4], f, 30, tlbrs[5]) for
+                          (tlbrs, f) in zip(dets[:, :6], id_feature)]
         else:
             detections = []
-
         ''' Add newly detected tracklets to tracked_stracks'''
         unconfirmed = []
         tracked_stracks = []  # type: list[STrack]

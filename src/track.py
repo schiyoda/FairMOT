@@ -63,19 +63,22 @@ def eval_seq(opt, dataloader, data_type, result_filename, save_dir=None, show_im
         online_targets = tracker.update(blob, img0)
         online_tlwhs = []
         online_ids = []
+        online_classid = []
         for t in online_targets:
             tlwh = t.tlwh
             tid = t.track_id
+            classid = t.classid
             vertical = tlwh[2] / tlwh[3] > 1.6
             if tlwh[2] * tlwh[3] > opt.min_box_area and not vertical:
                 online_tlwhs.append(tlwh)
                 online_ids.append(tid)
+                online_classid.append(classid)
         timer.toc()
         # save results
         results.append((frame_id + 1, online_tlwhs, online_ids))
         if show_image or save_dir is not None:
             online_im = vis.plot_tracking(img0, online_tlwhs, online_ids, frame_id=frame_id,
-                                          fps=1. / timer.average_time)
+                                          fps=1. / timer.average_time, ids2=online_classid)
         if show_image:
             cv2.imshow('online_im', online_im)
         if save_dir is not None:

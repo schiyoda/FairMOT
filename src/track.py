@@ -58,8 +58,10 @@ def eval_seq(opt, dataloader, data_type, result_filename, save_dir=None, show_im
 
         # run tracking
         timer.tic()
-        blob = torch.from_numpy(img).cuda().unsqueeze(0)
-        ##blob = torch.from_numpy(img).unsqueeze(0)
+        if opt.gpus[0] >=0:
+            blob = torch.from_numpy(img).cuda().unsqueeze(0)
+        else:
+            blob = torch.from_numpy(img).unsqueeze(0)
         online_targets = tracker.update(blob, img0)
         online_tlwhs = []
         online_ids = []
@@ -68,8 +70,9 @@ def eval_seq(opt, dataloader, data_type, result_filename, save_dir=None, show_im
             tlwh = t.tlwh
             tid = t.track_id
             classid = t.classid
-            vertical = tlwh[2] / tlwh[3] > 1.6
-            if tlwh[2] * tlwh[3] > opt.min_box_area and not vertical:
+            ##vertical = tlwh[2] / tlwh[3] > 1.6
+            ##if tlwh[2] * tlwh[3] > opt.min_box_area and not vertical:
+            if tlwh[2] * tlwh[3] > opt.min_box_area:
                 online_tlwhs.append(tlwh)
                 online_ids.append(tid)
                 online_classid.append(classid)
